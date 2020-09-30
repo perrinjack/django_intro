@@ -25,4 +25,6 @@ class QuestionModelTests(TestCase):
         recent_question = Question(pub_date=time)
         self.assertIs(recent_question.was_published_recently(), True)
 
-    
+    def test_returns_question_text(self):
+        recent_question = Question(question_text = 'First question')
+        self.assertIs(recent_question.__str__(), 'First question')
