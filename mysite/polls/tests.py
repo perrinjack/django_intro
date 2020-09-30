@@ -7,6 +7,17 @@ from django.utils import timezone
 
 from .models import Question
 
+""" TEST HELPERS
+      Create a question with the given `question_text` and published the
+      given number of `days` offset to now (negative for questions published
+      in the past, positive for questions that have yet to be published).
+      """
+
+
+def create_question(question_text, days):
+    time = timezone.now() + datetime.timedelta(days=days)
+    return Question.objects.create(question_text=question_text, pub_date=time)
+
 
 class QuestionModelTests(TestCase):
 
@@ -26,5 +37,5 @@ class QuestionModelTests(TestCase):
         self.assertIs(recent_question.was_published_recently(), True)
 
     def test_returns_question_text(self):
-        recent_question = Question(question_text = 'First question')
+        recent_question = Question(question_text='First question')
         self.assertIs(recent_question.__str__(), 'First question')
