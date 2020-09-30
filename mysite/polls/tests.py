@@ -4,7 +4,7 @@ from django.test import TestCase
 import datetime
 from django.test import TestCase
 from django.utils import timezone
-
+from django.urls import reverse
 from .models import Question
 
 """ TEST HELPERS
@@ -17,6 +17,28 @@ from .models import Question
 def create_question(question_text, days):
     time = timezone.now() + datetime.timedelta(days=days)
     return Question.objects.create(question_text=question_text, pub_date=time)
+
+
+class QuestionIndexViewTests(TestCase):
+    def test_no_questions(self):
+        response = self.client.get(reverse('polls:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No polls are available.")
+        self.assertQuerysetEqual(
+            response.context['latest_question_list'], [])
+
+
+    def test_past_question(self):
+        """
+        Questions with a pub_date in the past are displayed on the
+        index page.
+        """
+        create_question(question_text="Past question.", days=-30)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            response.context['latest_question_list'],
+            ['<Question: Past question.>']
+        )
 
 
 class QuestionModelTests(TestCase):
@@ -39,14 +61,3 @@ class QuestionModelTests(TestCase):
     def test_returns_question_text(self):
         recent_question = Question(question_text='First question')
         self.assertIs(recent_question.__str__(), 'First question')
-
-
-    class QuestionIndexViewTests(TestCase):
-    def test_no_questions(self):
-        """
-        If no questions exist, an appropriate message is displayed.
-        """
-        response = self.client.get(reverse('polls:index'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "No polls are available.")
-        self.assertQuerysetEqual(response.context['latest_question_list'], [])
