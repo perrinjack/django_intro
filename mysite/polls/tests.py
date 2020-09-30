@@ -39,3 +39,14 @@ class QuestionModelTests(TestCase):
     def test_returns_question_text(self):
         recent_question = Question(question_text='First question')
         self.assertIs(recent_question.__str__(), 'First question')
+
+
+    class QuestionIndexViewTests(TestCase):
+    def test_no_questions(self):
+        """
+        If no questions exist, an appropriate message is displayed.
+        """
+        response = self.client.get(reverse('polls:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No polls are available.")
+        self.assertQuerysetEqual(response.context['latest_question_list'], [])
